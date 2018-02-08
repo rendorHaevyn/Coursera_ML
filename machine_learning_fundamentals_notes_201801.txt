@@ -1,0 +1,213 @@
+INDEX:
+1.  == WEEK 2 - LINEAR REGRESSION ==
+2.  == WEEK 3 - LOGISTIC REGRESSION ==
+
+X. == ASSIGNMENT SOLUTION EXAMPLES ==
+
+
+== WEEK 2 - LINEAR REGRESSION ==
+Feature scaling:
+> feature scaling (using range of values) & mean normalisation (or standard deviation), ie: (x1 - u1) / s1
+> this assists with convergence speed
+
+Learning rate:
+> begin with low rate (ie: 10e-3), plot the change in cost function with each iteration and watch for convergence
+> increase the learning rate with a 3 fold increase
+
+Features & polynomial regression:
+> We can improve our features and the form of our hypothesis function in a couple different ways.
+> We can combine multiple features into one. For example, we can combine x1 and x2 into a new feature x3 by taking x1⋅x2.
+> Our hypothesis function need not be linear (a straight line) if that does not fit the data well.  We can change the behavior or curve of our hypothesis function by making it a quadratic, cubic or square root function (or any other form).
+eg: hθ(x)=θ0+θ1x1+θ2x2+θ3x3+θ4√(x4)
+
+Using "Normal Equation" to solve to minimise cost function for linear regression:
+> theta = pinv(X'.X).X'.Y
+> the normal equation works by minimizing the cost function (J) by explicitly taking its derivatives with respect to the θj ’s, and setting them to zero.
+> in this case, feature scaling / normalisation is not required, as we are solving for the global minima
+
+Minimising cost function for linear regression:
+> if n (# features) is large (ie: >=10,000), then use gradient descent
+> if n (# features) is small (ie: <=10,000), then use normal function
+
+Gradient descent algorithm:
+> for all features, j: 
+θ(j):= θ(j) - alpha 1/m . sum{i=1:m}(hθ(x(sup i) - y(sup i)) . x(sub j)(sup i) 
+> where j = feature (each feature iterated), and i = training example (each example iterated)
+> basically, all θ (feature parameters) are simultaneously updated at learning rate of alpha relative to changes in the point derivative change in the cost function
+
+Vectorization:
+> allows for improved efficiency in solving problems
+> eg: Yhat = matrix X * vector θ
+
+
+== WEEK 3 - LOGISTIC REGRESSION ==
+Classification:
+> classification is required when predicting a small number of discrete values
+> linear regression can produce values << 0 and >> 1, even if training examples are such that y∈{0,1}
+> outliers can drastically change linear regression classification and thus significantly impair prediction accuracy
+> logistic regression models can be set up to produce a classification hypothesis such that 0 <= hθ(x) <= 1
+> sigmoid function == logistic function = hθ(x) = g(z) = 1 / (1 + e^-z) = 1 / (1 + e^-θ'X)
+> hθ(x) is the estimated probability that y = 1 on input x
+
+Decision Boundary:
+> hθ(x):= g(z):= g(θ'x) >= 0.5 where θ'x >= 0  (ie θ'.0 = 1 / (1 + e^-θ'x) = 1 / (1 + e^-0) = 1 / (1 + 1) = 1 / 2
+> therefore, we can predict that y = 1 where hθ(x) >= 0.5 which is when θ'x >= 0.
+> the decision boundary reflects the line dividing parameters in the feature space between the regions where the hypothesis predicts y = 1 from the region that predict where y = 0
+> basically, the way our logistic function g behaves is that when its input is greater than or equal to zero, its output is greater than or equal to 0.5
+> non-linear decision boundaries are possible by using higher-order polynomials (ie: θ0 + θ1x2 + θ2x2 + θx1^2x2^2 ...)
+
+Cost Function:
+> we define the logistic regression cost function without a square, because this creates a non-convex cost function, which typically has multiple local optima (in contrast to a convex cost function which has a global minimum)
+> writing the cost function in the following way ensures that it is convex for logistic regression
+> J(θ):= 1/m ∑(i:m) Cost(hθ(x(i)),y(i))
+> Cost(hθ(x),y):= -log(hθ(x)) where y = 1, (so, as hθ(x) --> 0, J(θ) --> infinity)  AND
+> Cost(hθ(x),y):= -log(1 - hθ(x)) where y = 0, (so, as hθ(x) --> 1, J(θ) ---> infinity)
+> therefore, Cost(hθ(x),y):= -y.log(hθ(x)) - (1 - y).log(1 - hθ(x))
+> therefore, J(θ) = -1/m . [∑(i:m) -y.log(hθ(x(i))) + (1 - y(i)).log(1 - hθ(x(i)))]
+> Vectorised:
+h=g(Xθ)
+J(θ)=1/m⋅(−y'log(h)−(1−y)'log(1−h))
+
+Gradient descent algorithm:
+> simultaneously update, for all features, n, is exactly the same as the linear regression update rule:
+θ(n):= θ(n) - alpha 1/m . ∑(i:m) (hθ(x(i) - y(i)) . x(n)(i))
+> where n = feature (each feature iterated), and i = training example (each example iterated), and alpha is the learning rate
+> Vectorised:
+θ:=θ−α/m.X'(g(Xθ)−y(hat))
+
+Feature scaling:
+> Important in logistic regression also!
+
+Advanced Descent Algorithms:
+> some incomprehensible stuff (Conjugate gradient, BFGS, L-BFGS)
+> use "fminunc" function in Octave
+
+Multiclass Classification:
+> a single class (one of k classes) is separated out from the others and assigned a positive class (y=1), while everything else is bundled as a negative class (y=0)
+> thus, we end up with k logistic regression classifiers, predicting a single class relative to all others bundled
+> we run all k binary logistic regression classifiers, and pick the classifier that maximises hθ(x)
+
+Overfitting:
+> Underfitting is known as having bias
+> Overfitting is known as having variance
+> We want models to "generalise" to new test data
+> If there are too many features and very few training examples then overfitting can be a problem 
+
+
+Regularisation - Linear Regression:
+> To avoid overfitting, we can apply a "regularisation parameter", λ (lambda), to the cost function, λ.∑(j:n)θj^2 - the λ determines how much our theta params are inflated in the cost function
+> too large a λ will result in too high a pentalty, and err towards underfitting, while too small a λ will err towards overfitting (where there are many features used relative to the training set size)
+>> this adds a penalty to the cost function for each θ, thus, the cost function tries to minimise / reduce the size of θ, while also trying to reduce the difference between predicted outcomes and actuals
+> thus, J(θ) = 1/2m . ∑(i:m)(hθ(x(i)) - y(i))^2 . λ.∑(j:n)θj^2
+> NOTE: we do not penalise θ0 (for the constant term) - we only penalise θ's for the features
+
+Regularisation - Linear Regression - Gradient Descent:
+> Minimise cost function by also subtracting the derivative of the regularisation equation, 
+> Thus: θ(j):= θ(j) - alpha 1/m . [ ∑(i:m)(hθ(x(i)) - y(i)).x(j)(i) + λ/m.θj ]
+> which is also written as: θ(j):= θ(j)(1 - alpha.λ/m) - alpha.1/m . ∑(i:m)(hθ(x(i)) - y(i)).x(j)(i)
+> Determine simultaneously for all features, j
+> Remember that the regularisation component only applies to θ(1:j), and not θ0 (for the constant)
+
+Regularisation - Logistic Regression:
+> We add in the regularisation term, λ/2m.∑(j:n)θ(j)^2
+> thus, cost functon: 
+J(θ) = -1/m . [ ∑(i:m) y(i).log(hθ(x(i))) + (1-y(i)).log(1-hθ(x(i))) ] + λ/2m.∑(j=1:n)θ(j)^2
+
+Regularisation - Logistic Regression - Gradient Descent:
+> The formula looks the same to regularisation of linear regression with gradient descent, above, however, noting that logistic regression takes a differently defined hθ(x):= 1 / (1 + e^-θ'x)
+
+== WEEK 4 & 5 - NEURAL NETWORKS ==
+* Logistic regression is good for discrete hypotheses (creating a definition boundary for straight lines and ellipses), but not for complex multi-feature non-linear problems
+> eg: to solve complex non-linear boundaries, quadratic feature maps may be required, such as 50*50 pixel image = 2500 featurs = 3 million features, or 50 million features for a 100 * 100 pixel image)
+> thus, we need something other than logistic regression
+
+Model Representation:
+* a neuron receives a bunch of inputs (dendrite pulses) from various feature units, and a bias node or unit (x0) 
+> the bias unit, x0, takes a value of 1, however it can still have a differing weight (theta(0))
+* the neuron will output a signal (axonal output) according to its activation function (ie: sigmoid / logistic)
+* the feature thetas (or, parameters) are typically referred to as "weights" in neural networks
+* input units --> hidden layer(s) --> output layer
+* the matrix of weights controlling function mapping from layer (j) to (j+1) will take the dimensional form of: 
+  [# units in layer (j+1) *  # inputs layer (j) + 1]  --> the + 1 is for the bias weight, 
+  ie: layer (j+1) rows for each unit, and layer (j) + 1 columns for input feature units including a bias
+> a(i)(j+1) =  g(z(i)(j)) = g(θ(i0)(j)x(0) + θ(i1)(j)x(1) + .... + θ(in)(j)x(n)
+> activation of unit i in layer j is a function of theta (layer j, feature n)(layer j) * x(feature n)
+* the hidden layers of nodes are sometimes called "activation units"
+
+Forward Propagation:
+> activation of inputs layer to hidden layers(s) to output layer
+> a(i)(j) = g(x) = g(z(i)(j)) --> node (unit) i, layer j
+> z(j+1) = θ(j).x(j) = θ(j).a(j)
+> a(j+1) = g(z(j+1))
+> vector representation: a(j) = x(j) = [x0 ; x1 ; ... ; xn] ; z(j) = [z(1)(j) + z(2)(j) + ... + z(n)(j)]
+> z(j+1) = θ(j).a(j)
+> θ(j) is a matrix with dimensions s(j) * n + 1, where s(j) = # activation nodes in layer j, and n = # features + 1 for bias node
+==> consider the # activation nodes to be like the # of training examples, m
+> a(j) is a vector with height n + 1
+
+Cost function & Back Propagation Algorithm:
+> L = number of layers; sl = number of units in layer l (not including bias unit / node); K = number of units in output layer
+> l = current layer; j = node j in layer l; i = current training example (observation); m = number of training examples
+> ie: a(sub j)(sup l) = activation of jth unit in layer l 
+> binary classification = 1 output unit (K=1); multi-class classification, where K >= 3 classes, (ie: vector output [0;0;1;0]
+> The cost function is take across all output nodes, K
+> Backpropagation algorithm
+* is essentially the "gradient descent"
+* delta, ð, reflects the error term of node j in layer l
+* For output layer: ð(j)(l) = a(j)(l) = h(θ(k))(j) - y(j), so vector notn: a(L) - y 
+* For output layer: ie: the error term, delta, is the predicted value of unit a in layer l, minus the actual value of unit a in layer l
+* For hidden layers: 
+  ** vector notn: ð(j) = θ(j)'*ð(j+1) .* g(prime)(z(j)), where g(prime)(z(3)) = a(3) .* (1 - a(3))
+* For input layer: no calculation, as these are actuals (observed)
+* Backpropagation refers to the fact that we calculate the error term for the output layer, then iterate backwards through the hidden layers 
+* ∆ (ie: capital delta) = ∆(ij)(l) = ∆(ij)(l) + a(l)ð(l+1)
+* vector notn: ∆(l) = ∆(l) + ð(l+1)*a(l)'
+> Calculation of the partial derivatives of J(theta) WRT theta(ij)(l) is:  [observation i, node j, layer l]
+* where j=0 (bias node):     D(ij)(l) = 1/m ∆(ij)(l) 
+* where j<>0 (feature node): D(ij)(l) = 1/m ∆(ij)(l) + λθ(ij)(l)
+> We iterate over the training examples, running ForwardProp for each example then BackProp for each example
+
+BackProp in Practice:
+> before a crash, I wrote a whole lot of stuff on unrolling matrices to a row vector ie:theta_vec = [theta_1(:);...;theta_L-1(:)]
+* Implementation notes:
+thetaVector = [ Theta1(:); Theta2(:); Theta3(:); ]
+deltaVector = [ D1(:); D2(:); D3(:) ]
+Theta1 = reshape(thetaVector(1:110),10,11)
+Theta2 = reshape(thetaVector(111:220),10,11)
+Theta3 = reshape(thetaVector(221:231),1,11)
+> and about gradient checking, using epsilon as an offset to J(theta), two-sided, to estimate the gradient to make sure that BackProp is doing the correct thing
+* Implementation notes:
+epsilon = 1e-4;
+for i = 1:n,
+  thetaPlus = theta;
+  thetaPlus(i) += epsilon;
+  thetaMinus = theta;
+  thetaMinus(i) -= epsilon;
+  gradApprox(i) = (J(thetaPlus) - J(thetaMinus))/(2*epsilon)
+end;
+> If theta is initialised to zero (or any value which is the same for all elements of theta), thetas from each feature (x, e 1:n) feeding into activation units of hidden layer will take on teh same values following BackProp (gradient descent), and the activation units of the hidden layer will also take the same value!
+* Thus, thetas are randomly initialised, eg:
+If the dimensions of Theta1 is 10x11, Theta2 is 10x11 and Theta3 is 1x11.
+Theta1 = rand(10,11) * (2 * INIT_EPSILON) - INIT_EPSILON;
+Theta2 = rand(10,11) * (2 * INIT_EPSILON) - INIT_EPSILON;
+Theta3 = rand(1,11) * (2 * INIT_EPSILON) - INIT_EPSILON;
+
+Network Architecture:
+> # input nodes = # features (dimensions)
+> # output nodes = # classes ==> in a multi-class output, this is represented as a vector, eg: s(L) = 5, if y=3, [0;0;1;0;0]
+> hidden layers: usually 1 layer is ok, and if >1, then ensure nodes in layer l == nodes in layer l+1
+
+Calculate ForwardProp and BackProp for each training example, like so:
+for i = 1:m,
+   Perform forward propagation and backpropagation using example (x(i),y(i))
+   (Get activations a(l) and delta terms d(l) for l = 2,...,L
+
+
+
+
+
+== ASSIGNMENT SOLUTION EXAMPLES ==
+https://github.com/liquidpie/andrew-ng-ml-solutions
+https://github.com/kaleko/CourseraML
+help: https://www.coursera.org/learn/machine-learning/discussions/all/threads/vgCyrQoMEeWv5yIAC00Eog?page=2
+help: https://www.coursera.org/learn/machine-learning/profiles/4a373eb3f73b6c0a931e5ac2518d7298
