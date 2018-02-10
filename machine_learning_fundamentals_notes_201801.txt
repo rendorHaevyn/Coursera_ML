@@ -203,7 +203,44 @@ for i = 1:m,
    (Get activations a(l) and delta terms d(l) for l = 2,...,L
 
 
+Model Selection:
+> Generate hypotheses θ's for features across different models (ie: different order polynomials) on Training set (60%), choose the model with the lowest cost function on the Cross Validation set (20%), then estimate generalisation error of model on Test set (20%)
+> Remember: Select model thetas using Training set, validate and select lowest cost function model on Cross Validation set, and finally, report on model generalisation / success using the Test set
 
+Bias vs Variance:
+> high bias (underfitting), high variance (overfitting)
+> high bias: Training error and Cross Validation errors are high
+> high variance: Training error is low and Cross Validation error is high (ie: J(theta,CV) >> J(theta,Training)
+> Regularisation (lambda) value selection can be iterated across models, and cost function outcomes can be plotted across these models for Cross Validation and Training sets
+* Low lambda will result in low penalties for thetas and thus more likely overfit the Training set, whereas large lambda will highly penalise thetas and likely result in an underfit (ie: just provide a bias term)
+
+Learning Curves (Diagnostic):
+> "Learning Curves" - plotting the cost functions for Training set and Cross Validation sets
+> Helps detect if model is underfitted (bias) or overfitted (variance)
+> Plot error by m (# of training examples used)
+> Error for Training set:
+* Is low for a small number of m (training examples)
+* Increases for a higher number of m
+> Error for Cross Validation set:
+* Is high for small number of m (training examples) because the solution (thetas) does not generalise very well
+* Decreases for a higher number of m
+> In cases of high bias (underfit models), as m increases, Training set and Cross Validation set errors converge very early on, and are very similar (J(train) ~ J(CV))
+    * ie: a high bias model cannot be helped by increasing the # of training examples (m)
+> In cases of high variance (overfit models), as m increases, Training set and Cross Validation set errors increasingly converge, and there is a large gap between them (J(train) << J(CV))
+    * ie: a high variation model can be helped by increasing the # of training examples (m)
+> High Variance (OverFitting) can be fixed by:
+    * Increasing training examples (m)
+    * Using a smaller set of features
+    * Increasing lambda (regularisation parameter penalty)
+> Low Variance (Underfitting) can be fixed by:
+    * Using additional features
+    * Adding polynomial features
+    * Decreasing lambda (regularisation parameter penalty)
+
+Model Complexity Effects:
+> Lower-order polynomials (low model complexity) have high bias and low variance. In this case, the model fits poorly consistently.
+> Higher-order polynomials (high model complexity) fit the training data extremely well and the test data extremely poorly. These have low bias on the training data, but very high variance.
+> In reality, we would want to choose a model somewhere in between, that can generalize well but also fits the data reasonably well.
 
 
 == ASSIGNMENT SOLUTION EXAMPLES ==
