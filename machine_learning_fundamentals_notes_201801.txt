@@ -154,7 +154,7 @@ Cost function & Back Propagation Algorithm:
 > Backpropagation algorithm
 * is essentially the "gradient descent"
 * delta, ð, reflects the error term of node j in layer l
-* For output layer: ð(j)(l) = a(j)(l) = h(θ(k))(j) - y(j), so vector notn: a(L) - y 
+* For output layer: ð(j)(l) = a(j)(l) = h(θ(k))(j) - y(j), so vector notation: a(L) - y 
 * For output layer: ie: the error term, delta, is the predicted value of unit a in layer l, minus the actual value of unit a in layer l
 * For hidden layers: 
   ** vector notn: ð(j) = θ(j)'*ð(j+1) .* g(prime)(z(j)), where g(prime)(z(3)) = a(3) .* (1 - a(3))
@@ -202,7 +202,7 @@ for i = 1:m,
    Perform forward propagation and backpropagation using example (x(i),y(i))
    (Get activations a(l) and delta terms d(l) for l = 2,...,L
 
-
+== WEEK 6 - APPLICATION OF LEARNING ALGORITHMS ==
 Model Selection:
 > Generate hypotheses θ's for features across different models (ie: different order polynomials) on Training set (60%), choose the model with the lowest cost function on the Cross Validation set (20%), then estimate generalisation error of model on Test set (20%)
 > Remember: Select model thetas using Training set, validate and select lowest cost function model on Cross Validation set, and finally, report on model generalisation / success using the Test set
@@ -241,6 +241,41 @@ Model Complexity Effects:
 > Lower-order polynomials (low model complexity) have high bias and low variance. In this case, the model fits poorly consistently.
 > Higher-order polynomials (high model complexity) fit the training data extremely well and the test data extremely poorly. These have low bias on the training data, but very high variance.
 > In reality, we would want to choose a model somewhere in between, that can generalize well but also fits the data reasonably well.
+
+Building a Spam Classifier:
+How could you spend your time to improve the accuracy of this classifier?
+> Collect lots of data (for example "honeypot" project but doesn't always work)
+> Develop sophisticated features (for example: using email header data in spam emails)
+> Develop algorithms to process your input in different ways (recognizing misspellings in spam).
+It is difficult to tell which of the options will be most helpful.
+
+Error Analysis:
+The recommended approach to solving machine learning problems is to:
+> Start with a simple algorithm, implement it quickly, and test it early on your cross validation data.
+> Plot learning curves to decide if more data, more features, etc. are likely to help.
+> Manually examine the errors on examples in the cross validation set and try to spot a trend where most of the errors were made.
+* Use a numerical evaluation such as % error rate on the Cross Validation dataset to determine accuracy change across model choices
+
+Skewed Classes:
+> Have more examples in one class than another class (ie: rare diseases)
+> Use a confusion matrix to determine accuracy:
+* Precision: of predicted cases, what % were true-positive = True Positive / # Predicted Positive = True Positive / (True Positive + False Positive)
+* Recall: of actual cases, what % did we accurately predict = True Positive / # Actual Positive = True Positive / (True Positive + False Negative)
+> y = 1 when predicting rare cases
+> If we increase the threshold for predicting rare (cancer?) cases to say >0.7 for logistic regression, we will increase precision but have a lower recall ==> ie: we might avoid the trauma of a false report of cancer
+> If we lower the threshold for predicting rare (cancer?) cases to say >0.3 for logistic regression, we will increase recall (fewer false negatives) but have a lower precision ==> ie: we might send off more people for testing than we need to
+
+F1 Score:
+> F1 Score = 2 * (P*R) / (P + R), where P = Precision & R = Recall
+> F1 Score element of {0,....,1}
+
+Large data rationale:
+> Use a large number of features, so likely to create more complex prediction, creating a low bias algorithm with low cost function
+> use a large number of training examples, so unlikely to overfit, creating a low variance algorithm with cost function on training similar to cost function on testing 
+
+== WEEK 7 - SUPPORT VECTOR MACHINES ==
+
+
 
 
 == ASSIGNMENT SOLUTION EXAMPLES ==
