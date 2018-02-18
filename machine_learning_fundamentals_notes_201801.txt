@@ -274,6 +274,61 @@ Large data rationale:
 > use a large number of training examples, so unlikely to overfit, creating a low variance algorithm with cost function on training similar to cost function on testing 
 
 == WEEK 7 - SUPPORT VECTOR MACHINES ==
+SVM:
+* An alternative take on logistic regression cost minimization formulua, such that:
+** min (θ) C ∑(i=1:m) [ y(i) * cost1(θ'x(i)) + (1-y(i)) * cost0(θ'x(i)) ] + 1/2.∑(j=1:n).θ(j)^2 , where C = 1/λ
+> the hypothesis, hθ(x) of SVMs does not output a probability, rather, a scalar 1 or 0 
+* SVM hθ(x) = 1 if θ'x >> 0
+* SVM hθ(x) = 0 otherwise, ie: if θ'x << 0
+> SVM has a built in buffer-zone, and rather than centering around 0, it will predict:
+* if y=1, θ'x >= 1
+* if y=0, θ'x <= -1
+> The buffer acts as a "large margin" classifier, which means that the predicted line between classes has the largest margin between classes
+> When C (1/λ) is not very large, the SVM does a better job of ignoring outliers and finding a line of best prediction (ie: will underfit / apply more regularisation)
+> SVMs are convex functions, so always have a *global* minima
+
+Kernels:
+> For predicting a non-linear boundary, adding higher order polynomial features can help predict y =1, such that θ0 + θ1x1 + ... θ5x^2.. >= 0
+> We can create features, f, which take the similarity function or kernel (Gaussian kernel), 
+ie: f1 = similarity(x,l(1)) = exp(-||x-l(1)||^2 / (2*ð)^2)
+where ð = sigma; l = landmark, a proximity landmark; x = training example; ||foo|| is the distance between training example and the landmark
+* if x ~ l(1), then f1 ~ e^0 ~ 1
+* if x very farm from l(1), then f1 ~ e^-(large number) ~ 0
+> Each landmark can be used to define a different feature
+> Changes in sigma:
+* Increase in sigma - reduces the negative exponent value, so a difference between x and l results in a more gradual drop of f to zero
+* Decrease in sigma - increases the negative exponent value, so a difference between x and l results in a faster drop of f to zero
+* Note that changes in sigma does not affect the max value that f obtains
+> So, hypothesis function becomes:
+* hθ(x) = θ0 + θ1f1 + θ2f2 + θ3f3 ... θnfn, for functions describing similarity b/w x and l
+** ie: when x is close to a landmark (l), θ will be close to 1, and when it's further away, θ will be closer to 0
+> Landmarks:
+* Using landmarks and similarity functions gives the ability to predict very complex non-linear decision boundaries, and without creating complex polynomial features
+* Landmarks are created based off values for x, so m examples becomes m landmarks, with a similarity function for each landmark, creating a vector of features f1--fm, where f0 = 1 for the bias/intercept term
+* For each example, x(i)y(i), each features f1(i)-->fm(i) are calculated as the similarity relative to all other training examples, sim(x(i),l(1)) --> sim(x(i),l(m))
+* This will become a feature vector, f(i):= [f0(i); f1(i); ...; fm(i)]
+* Predict y = 1 if hθ(x):= θ'f >= 0, 
+** min (θ) C ∑(i=1:m) [ y(i) * cost1(θ'f(i)) + (1-y(i)) * cost0(θ'f(i)) ] + 1/2.∑(j=1:n).θ(j)^2 , where C = 1/λ
+** we do not regularise on θ0
+** Large C: lower bias, higher variance [less regularisation] --> overfit
+** Small C: higher bias, lower variance [more regularisation] --> underfit
+** Large Sigma squared: features f(i) vary more smoothly, higher bias, lower variance --> underfit
+** Small Sigma squared: features f(i) vary more rapidly, lower bias, higher variance --> overfit
+> Modelling decisions:
+1. Choice of C and sigma squared
+2. Choice of kernel
+> Linear kernel (ie: dont create features, just use x) might be chosen where the # features, n, is very high, and number of training examples, m, is very low; the linear kernel returns a straight-line decision boundary
+> Gaussian kernel: NOTE: remember to perform feature scaling before using a Gaussian kernel
+> Polynomial kernel: includes a constant and choice on the polynomial term (exponent degree)
+> Other kernels: string kernel, chi square kernel, histogram intersection kernel...
+
+SVM vs Logistic Regression:
+> If n (features) is high and m (training examples is low), use logistic regression or SVM with a linear kernel; ie: n=10k, m=1k
+> If n is small and m is intermediate (ie: n=1k, m=10k), use SVM with Gaussian kernel
+> If n is small (~1k) and m is large (50k+), Gaussian kernels struggle with this, so 
+    * create additional features, and 
+    * use logistic regression or SVM without a kernel (ie: linear kernel)
+> NOTE: A neural network will work well in all conditions, but might talke longer to train
 
 
 
