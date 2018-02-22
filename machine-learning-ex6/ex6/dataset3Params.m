@@ -23,10 +23,25 @@ sigma = 0.3;
 %        mean(double(predictions ~= yval))
 %
 
+iters = [0.01, 0.03, 0.1, 0.3, 1, 3, 10, 30];
+results = []; % C sigma prediction-error
 
+% Submit runs the entire fucking iteration, so just using the iter solutions for now
+for i_c = 1 %iters - putting in the the optimal solution
+  for i_s = 0.1 %iters - putting in the optimal solution
+    
+    model= svmTrain(X, y, i_c, @(x1, x2) gaussianKernel(x1, x2, i_s));  % I dont know how x1 x2 feat works...  
+    predictions = svmPredict(model,Xval);
+    pred_err = mean(double(predictions ~= yval));
+    results = [results(:,:); i_c i_s pred_err]; % Add additional row with results from C and sigma combo
+    
+  endfor
+endfor  
 
-
-
+% Find minimum prediction error by C / sigma combo and return;
+[m_val row_ind] = min(results(:,end)); % row index for lowest result in last column
+C = results(row_ind,1);
+sigma = results(row_ind,2);
 
 
 % =========================================================================

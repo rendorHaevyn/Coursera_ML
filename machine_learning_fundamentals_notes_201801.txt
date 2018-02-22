@@ -1,6 +1,10 @@
 INDEX:
 1.  == WEEK 2 - LINEAR REGRESSION ==
 2.  == WEEK 3 - LOGISTIC REGRESSION ==
+3.  == WEEK 4 & 5 - NEURAL NETWORKS ==
+4.  == WEEK 6 - APPLICATION OF LEARNING ALGORITHMS ==
+5.  == WEEK 7 - SUPPORT VECTOR MACHINES ==
+6.  == WEEK 8 - UNSUPERVISED LEARNING ==
 
 X. == ASSIGNMENT SOLUTION EXAMPLES ==
 
@@ -329,6 +333,10 @@ SVM vs Logistic Regression:
     * create additional features, and 
     * use logistic regression or SVM without a kernel (ie: linear kernel)
 > NOTE: A neural network will work well in all conditions, but might talke longer to train
+
+
+== WEEK 8 - UNSUPERVISED LEARNING ==
+
 
 
 

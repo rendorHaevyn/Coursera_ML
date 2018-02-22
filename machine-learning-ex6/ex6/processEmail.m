@@ -97,11 +97,19 @@ while ~isempty(email_contents)
     %       str2). It will return 1 only if the two strings are equivalent.
     %
 
-
-
-
-
-
+  %Locate string in vocabList  
+  f_str = lookup(vocabList,str);
+  %Add to word_indices if lookup matches string
+  if f_str > 0
+    if strcmp(str,vocabList{f_str})
+%      fprintf('Match on %s at index %s.\n',[vocabList{f_str},f_str]);
+      word_indices = [word_indices; f_str];
+    else
+      fprintf('\n\nLookup mismatch - %s does not match %s.\n\n',[str,vocabList{f_str}]);
+    endif  
+  else
+    fprintf('\n\nDid not find a match for: %s.\n\n',[str]);
+  endif  
 
 
 

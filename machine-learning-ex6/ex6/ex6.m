@@ -36,6 +36,7 @@ plotData(X, y);
 
 fprintf('Program paused. Press enter to continue.\n');
 pause;
+close(figure);
 
 %% ==================== Part 2: Training Linear SVM ====================
 %  The following code will train a linear SVM on the dataset and plot the
@@ -50,13 +51,18 @@ fprintf('\nTraining Linear SVM ...\n')
 
 % You should try to change the C value below and see how the decision
 % boundary varies (e.g., try C = 1000)
-C = 1;
-model = svmTrain(X, y, C, @linearKernel, 1e-3, 20);
-visualizeBoundaryLinear(X, y, model);
+for i = [1 4 400]
+  figure(i);
+  plotData(X, y);
+  C = i/4;
+  model = svmTrain(X, y, C, @linearKernel, 1e-3, 20);
+  visualizeBoundaryLinear(X, y, model);
 
-fprintf('Program paused. Press enter to continue.\n');
-pause;
-
+  fprintf('Program paused. Press enter to continue.\n');
+  pause;
+  close(i);
+endfor
+    
 %% =============== Part 3: Implementing Gaussian Kernel ===============
 %  You will now implement the Gaussian kernel to use
 %  with the SVM. You should complete the code in gaussianKernel.m
