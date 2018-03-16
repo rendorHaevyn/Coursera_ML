@@ -336,6 +336,136 @@ SVM vs Logistic Regression:
 
 
 == WEEK 8 - UNSUPERVISED LEARNING ==
+Clustering:
+> K-means clustering is the most popular clustering algorithm
+* Initialises with K cluster centroids, where K = number of desired clusters
+** observations are assigned to the closest cluster; these values are then averaged and the centroids are assigned this value
+** observations are again assigned to the closest cluster, and this step repeats, until convergence
+* input K clusters with training set x(1)...x(m), noting there are no 'y' values
+* process:
+    ** randomly init K cluster centroids, μ1-μk
+    ** for i:m (# training examples), c(i):=index (from 1 to K) of cluster centroid closest to x(i), and to which x(i) is assigned
+    ** for k = 1:K, μk:= average of points assigned to cluster k
+    ** μc(i) = average of points assigned to the cluster to which x(i) has been assigned
+        >> ie: if x(i) is assigned cluster 5, c(i) = 5, so μc(i) = μ5
+* If a cluster ends up with zero examples assigned, it can either be removed / eliminated or randomly re-initialised
+> Optimisation Obective:
+* Minimise cost function J, finding c and μ to minimise the following:
+min (c(1)...c(m), μ1...μK), J(c(1)...c(m),μ1...μK) = 1/m . ∑(i=1:m)||x(i) - μc(i)||^2, which is the norm of the difference between x(i) and uc(i)
+** This cost function is also called the Distortion of the K-Means cost function
+** The cost function should always converge to a minimum, and never increase (if it does, this means where may be a bug in the code)
+> Random initialisation of cluster centroids
+* Set K to < m (training examples)
+* Randomly pick K training examples, and set cluster centroids μ1 ... μK to the value of these training examples
+* Based on initialisation, there may be a local-optima solution, so to address this we can:
+    ** Initialise K-means multiple times, ie: 100 iterations to generate cost function (distortion function, J) minima
+    ** Pick cluster with lowest cost (distortion)
+    ** If K is low (<10), this will make a big impact
+    ** If K is large, multiple iterations might not be as effective and the initial solution will be OK
+> Choosing K - the number of clusters
+* Often this is manual - think about whether the solution is more useful in the real-world application
+* The "elbow method" is to plot the Cost function J by # Clusters and where the drop-off in J becomes low, chose that # clusters
+
+Dimensionality Reduction / Principal Component Analysis:
+* Benefits:
+    ** Reduces memory requirements for data storage (k such that >=99% of variance retained)
+    ** Learning algorithms can run more rapidly (k such that >=99% of variance retained)
+    ** Assist with visualisation (2 or 3 features from 50+)
+* NOTE: Before performing PCA, undertake mean normalisation and feature scaling!
+    ** ie: ( x(j) - μ(j) )/ s(j)
+* PCA finds a directional vector, u(1), onto which to project features which minimises the projection error, reducing dimensions from 2 to 1
+* Unlike linear-regression which minimises the distance between a line-of-best-fit and Y, PCA minimises the distance between both features values and the line, which is minimisation of the orthogonal distance 
+* In reducing the dimension from n to k, compute the "covariance matrix", Sigma matrix, and the eigenvectors or "Single Value Decomposition" of matrix Sigma (Sigma is an n x n matrix); take the first 7 columns of the U matrix
+* PCA Algorithm:
+    ** Mean normalise and feature scale
+    ** Sigma = 1/m . ∑(i=1:m) x(i).x(i)' = (1/m) * X' * X;  --> Covariance matrix
+    ** [U,S,V] = svd(Sigma);
+    ** Ureduce = U(:, 1:k);  % n * k matrix
+    ** z = Ureduce' * X; % k * 1 vector  (ie: k * n . k * 1 = k * 1 vector)
+> Reconstruction of X from compressed PCA representation can be approximated by:
+    ** Xapprox = Ureduce * z; % n * 1 vector
+> Choosing the Number of Principal Components
+* PCA tries to minimise the average squared projection error, 
+    Choose k to minimse projection error [eq 1]: 1/m . ∑(i=1:m) || X(i) - Xapprox(i) || ^2
+    Given variance [eq 2]: 1/m . ∑(i=1:m) || X(i) ||^2
+    ** Choose k to be the smallest value so that [eq 1] / [eq 2] <= 0.1%, or, "99% of variance is retained" in the projection (which means we can use these projections to still effectively explain variation in the target)
+    ** To solve this, call [U,S,V] = svd(Sigma);
+    ** Then, calculate smallest k for which: ∑(i=1:k)Sii / ∑(i=1:n)Sii >= 0.99 (ie: 99% of variance retained)
+* When performing PCA, create the mapping based on the training set only, then apply these same maps to the cross validation and test sets
+* Before performing PCA, build the model with x(i), and see how it works.  If it doesnt work well (ie: very slow, memory problem), then implement PCA and use z(i) ie: the compressed representation
+* Note: do not use PCA to prevent overfitting - use regularisation instead.
+
+
+== WEEK 9 - ANOMAOLY DETECTION ==
+Density Estimation:
+> for training set {x(1)...x(m)}, where x is an element of real numbers to need
+* p(x) := π(j=1:n) p(x(j); mu(j); sigma(j)^2), where π reflects the product of the probabilities
+* p(x(j)) is defined by the Gaussian probability distribution
+* Declare an anomaly where p(x) < ε (epsilon) (value set based on experience?)
+> model: p(x) = p(x(1); mu(1); sigma(1)^2) * ... * p(x(n); mu(n); sigma(n)^2)
+
+Building Anomaly Detection System:
+> Train: Build model, p(x), with "good" targets only, as the training data (60% split)
+> Cross Validate: 20% of training set, using 50% of the "bad/anomalous" targets
+* Predict y=1 (anomaly) if p (x) < ε (epsilon)
+* Evaluate with true-+ve, false-+ve, true--ve, false--ve, Precision/Recall, F-score
+* Using prediction accuracy is not ideal with skewed data (ie: rare anomolies) as prediction of non-anomalous data will be regarded as having high accuracy
+* NOTE: We can use the cross validation set to choose a value for epsilon, ε 
+> Test: 20% of training set, using 50% of the "bad/anomalous" targets
+
+Anomaly Detection vs Supervised Learning:
+> Anomaly Detection when:
+    * very few positive (anomalous) examples
+    * lots of negative examples
+    * many types of anomalies, which are rare, and very difficult to predict
+    * examples: fraud, manufacturing (aircraft engines), machines monitored in data centre
+> Supervised Learning when:
+    * large number of positive and negative examples
+    * positive examples can be explained by the algorithm, and will predictable appear in future test sets
+    * examples: email spam classification, weather prediction, cancer classification
+
+Using non-Gaussian features:
+> When creating the PDF for feature x(i), p(x(i); mu(i); sigma(i)^2)
+* If x(i) is non-Gaussian, we can consider transforming it, ie: 
+    * log(x(i))
+    * log(x(i)+c)
+    * sqrt(x(i))
+    * x(i)^(1/3)
+> Consider creating features that would take on unusually large or small values in the event of an anomaly
+
+Building multivariate Gaussian anomaly detection model:
+> (1) Fit model p(x) by:
+* mu = 1/m ∑(i=1:m) x(i)
+* Sigma = 1/m ∑(i=1:m) (x(i) - mu) . (x(i) - mu)'
+> (2) For new value x, compute:
+* p(x) = 1 / ( 2pi^n/2 |∑|^1/2 ) . exp(-1/2 (x - mu)' inverted(Sigma) (x - mu) )
+* flag anomaly if p(x) < ε
+
+Original model vs Multivariate model:
+> original: > model: p(x) = p(x(1); mu(1); sigma(1)^2) * ... * p(x(n); mu(n); sigma(n)^2)
+> Use the original model when:
+* manually create features to capture anomalies
+* create unusual features
+* computationally cheaper, and scales well to large n (features)
+* works well with small training set m (# training examples)
+> Use the multivariate model when:
+* automatically capture correlations between features
+* computationally more expensive
+* must have m > n else Sigma is non-invertible, and generally, we want m >= 10n to be useful
+
+Collaborative Filtering:
+> Given x(1)...x(nm) we can estimate θ(1)...θ(nu)
+> We can then use the θ's to estimate x's
+> on and on, until we get convergence of the minimisation of errors
+* We can instead merge the minimisation functions into a single function to solve for θ's (parameters) and x's (features)
+* We do not solve for the intercept feature, x(0)
+* x(i) and θ(i) are randomised to small values to serve as symmetry breaking (similar to the random initialization of a neural network’s parameters) and ensures the algorithm learns features x(1),…,x(nm) that are different from each other.
+* θ(j, 1:n(users)), x(i, 1:n(movies)) --> the θ's are described by each user for representative movies, while the x's (features) are describing values attached to each movie
+> Create vectorised representation by:
+* X[Capital] = [x(1)'; x(2)'; ... ; x(nm)'] --> where each x represents the features of each movie for each user
+* θ[Capital] = [θ(1)'; θ(2)'; ... ; θ(nu)'] --> where each θ represents the parameters of each movie for each user
+* Thus, X[Capital] . θ[Capital]' to solve
+> One can mean-normalise to impute missing values for various users 
 
 
 
@@ -345,4 +475,29 @@ SVM vs Logistic Regression:
 https://github.com/liquidpie/andrew-ng-ml-solutions
 https://github.com/kaleko/CourseraML
 help: https://www.coursera.org/learn/machine-learning/discussions/all/threads/vgCyrQoMEeWv5yIAC00Eog?page=2
-help: https://www.coursera.org/learn/machine-learning/profiles/4a373eb3f73b6c0a931e5ac2518d7298
+help: https://www.coursera.org/learn/machine-learning/profiles/4a373eb3f73b6c0a931e5ac2518d7298 
+
+
+== LINKS for Later Neural Network Review ==
+http://eugenezhulenev.com/blog/2014/11/14/stock-price-prediction-with-big-data-and-machine-learning/
+https://nicholastsmith.wordpress.com/2016/04/20/stock-market-prediction-using-multi-layer-perceptrons-with-tensorflow/
+http://jspauld.com/post/35126549635/how-i-made-500k-with-machine-learning-and-hft
+https://github.com/martin-gorner/tensorflow-rnn-shakespeare
+https://www.tensorflow.org/versions/master/get_started/mnist/pros
+https://www.springboard.com/blog/beginners-guide-neural-network-in-python-scikit-learn-0-18/
+https://www.udemy.com/courses/search/?q=neural%20networks&src=sac&kw=neural&sort=highest-rated&courseLabel=7380
+http://stackabuse.com/tensorflow-neural-network-tutorial/
+http://pybrain.org/docs/tutorial/datasets.html
+http://sujitpal.blogspot.com.au/2014/07/handwritten-digit-recognition-with.html
+https://pandas.pydata.org/pandas-docs/stable/dsintro.html
+http://glitter.im/
+https://github.com/wassname/rl-portfolio-management
+https://github.com/ZhengyaoJiang/PGPortfolio/blob/master/user_guide.md
+https://guides.github.com/activities/hello-world/
+https://research.googleblog.com/2016/08/improving-inception-and-image.html
+https://cloud.google.com/ml-engine/docs/getting-started-training-prediction
+https://finance.yahoo.com/quote/%5EGSPC/history?period1=1514552400&period2=1514638800&interval=1d&filter=history&frequency=1d
+https://stackoverflow.com/questions/42744903/keras-lstm-error-when-checking-model-input-dimension#
+https://keras.io/getting-started/sequential-model-guide/
+https://elitedatascience.com/keras-tutorial-deep-learning-in-python
+http://cs231n.github.io/neural-networks-1/
