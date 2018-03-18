@@ -468,6 +468,100 @@ Collaborative Filtering:
 > One can mean-normalise to impute missing values for various users 
 
 
+== WEEK 10 - GRADIENT DESCENT WITH LARGE DATASETS ==
+> More data facilitates for more accurate models, but training on millions of examples can give rise to significant computational overhead
+> To determine what m (# training exmples), one can plot a learning curve WRT m, and determine if there is high variance (overfitting) when m is small
+> types of descent:
+a) Batch gradient descent       - use m examples
+b) Stochastic gradient descent  - use 1 examples
+c) Mini batch gradient descent  - use b examples (where 1 < b <  m)
+
+
+Stochastic Gradient Descent:
+> "Batch gradient descent" is where the descent algorithm uses *all* of the training examples to calculate theta updates, and can be computationally expensive with large datasets
+> Stochastic GD only deals with the cost of one training example at a time.
+> The steps for SGD are (repeated in entirety up to 10 times):
+* 1. Randomly shuffle dataset
+* 2. Repeat for training examples i=1:m, :
+    * Repeat for features j=0:n, :
+        ** θj = θj - alpha.(hθ(x(i)) - y(i) ) . xj(i)
+> Unlike batch GD, stochastic GD is a bit more circuitous, and doesnt descend exactly to the local minima, but will head down towards it then oscillate around the global minimum (up or down in cost), although the θ will approach the global minima
+> Convergence can be checked by: 
+    * 1) during learning, compute cost J, then update θ
+    * 2) every 1,000 iterations, plot the cost J averaged over the last 1,000 examples processed
+    * Troubleshooting:
+        ** If there is a lot of noise in the plot, try increasing the # examples averaged over
+        ** If the curve is increasing, this suggests divergence, so perhaps use a smaller alpha (rate of descent reduction)
+    * To enhance descent toward the global minima, for SGD we can slowly decrease alpha to assist with convergence of θ, and this should reduce the oscillation
+
+Mini-Batch Gradient Descent:
+> b = mini-batch size, ie: # examples to use in gradient descent algorithm
+> b is typically between {2,100}
+> Repeat similarly to SGD, except in batches of 'b' examples, up to m examples
+> Good vectorization implementation in MBGD can facilitate for speed greater than SGD
+
+Online learning:
+> Might be used for a constant stream of data (ie: whether user wants to pay for shipping, given origin / destination) to learn continuously, rather than store data as a constant dataset
+* Update learning algorithm with Stochastic Gradient Descent then move on; optimise price offered based on this information
+> Product search is another application, ie: someone searches for android phone, have 100 phones in store, offer 10 for sale
+* Capture how many words in query match features of the phone, then capture whether the user clicks on teh phone (y=1 if clicked), the predict likelihood of clicking on phone, ie: "Predicted Click-Through-Rate"
+> Other examples: special offers, customised news articles, product recommendations, collaborative filtering mechanism for CTR stuff...
+
+Map-Reduce and Data Parallelism:
+> Split the training dataset into portions and get different machines to run the calculations across the cost function and gradient descent, then unite the results later on
+> Parallelise over machine cores, or across machines
+
+
+== WEEK 11 - PHOTO OPTICAL CHARACTER RECOGNITION (OCR) ==
+
+Photo OCR:
+> Undertake the following steps (pipeline):
+0. Input image
+1. Text detection
+    * apply expansion-operator to highlight the pixels which likely contain text
+    * draw boxes around the identified text blocks with applicable aspect ratios (should be wider than taller)
+2. Character Segmentation
+    * scan the text blocks, and look for natural white-space breaks between characters using a 1D sliding window
+3. Character Recognition / Classification
+4. Token correction (word correction)
+> When thinking about which part of the pipeline to invest the most time into, we can approach it in the following way, a method called "Ceiling Analysis":
+    * Look at accuracy of entire system on test set
+    * Look at change in accuracy when 100% accurate answers are provided to Text Detection
+    * Look at change in accuracy when 100% accurate answers are provided to Character Segmentation
+    * Look at change in accuracy when 100% accurate answers are provided to Character Recognition
+* This will help us narrow down to the value of adding more resources to particular areas of the pipeline
+> With face recognition, ceiling analysis might undertake the following steps: 
+    * Develop pipeline:
+        ** Camera Image --> Remove Background --> Face Detection --> Eyes & Nose & Mouth Segmentation --> Logistic Regression --> Label
+    * Ceiling analysis: 
+        ** Accuracy add of background removal
+        ** Accuracy add of face detection
+        ** Accuracy add of eyes detection
+        ** Accuracy add of nose detection
+        ** Accuracy add of mouth detection
+
+
+> Supervised learning for pedestrian detection
+* build training dataset with small positive images (y=1) and negative images (y=0, no pedestrians present)
+* Take the large input images (with lots of potential pedestrians) and then:
+    1. scan a window (small size) in the top left
+    2. scan / slide the window / patch across the input image, moving by a given step size / stride across the image
+    3. increase the size of the window / patch, and slide / scan across the input image, with the potential to detect larger-size pedestrians
+> The above process applies to a photo OCR system
+> Artificial data synthesis for photo OCR can be undertaken by:
+* Taking characters from free font libraries and pasting them onto random backgrounds
+* Apply various operators, such as torsion, blurring, affine distortion, scaling, distortion
+* Take actual positive image, then use artificial distortions, such as warping and other transforming
+* With audio, we can add background sounds to increase the training dataset artificially
+* These distortions **should be representative of what we would observe in the test set!**
+** Implementation Note: 
+1. before creating new data, ensure that we are using a low bias classifier first, by plotting learning curves; if not, increase the number of features / hidden units until we do (have a low bias classifier), and then start adding in extra training examples
+2. think about how much work it would take to get 10x's the amount of data?
+    * consider artificial data synthesis (generate data from scratch, or using existing example and introduce distortions)
+    * collect the data and label them myself (ie: # eggs in a photo)
+    * crowd-source (ie: Amazon Mechanical Turk) - hire others to label the data for you, at low cost
+
+
 
 
 
@@ -501,3 +595,4 @@ https://stackoverflow.com/questions/42744903/keras-lstm-error-when-checking-mode
 https://keras.io/getting-started/sequential-model-guide/
 https://elitedatascience.com/keras-tutorial-deep-learning-in-python
 http://cs231n.github.io/neural-networks-1/
+https://github.com/apress/practical-ml-w-python (http://isbn.directory/book/9781484232064)
