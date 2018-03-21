@@ -5,6 +5,10 @@ INDEX:
 4.  == WEEK 6 - APPLICATION OF LEARNING ALGORITHMS ==
 5.  == WEEK 7 - SUPPORT VECTOR MACHINES ==
 6.  == WEEK 8 - UNSUPERVISED LEARNING ==
+7.  == WEEK 9 - ANOMAOLY DETECTION ==
+8.  == WEEK 10 - GRADIENT DESCENT WITH LARGE DATASETS ==
+9.  == WEEK 11 - PHOTO OPTICAL CHARACTER RECOGNITION (OCR) ==
+
 
 X. == ASSIGNMENT SOLUTION EXAMPLES ==
 
@@ -31,7 +35,7 @@ Using "Normal Equation" to solve to minimise cost function for linear regression
 
 Minimising cost function for linear regression:
 > if n (# features) is large (ie: >=10,000), then use gradient descent
-> if n (# features) is small (ie: <=10,000), then use normal function
+> if n (# features) is small (ie: <=10,000), then use "normal equation"
 
 Gradient descent algorithm:
 > for all features, j: 
@@ -189,7 +193,7 @@ for i = 1:n,
   thetaMinus(i) -= epsilon;
   gradApprox(i) = (J(thetaPlus) - J(thetaMinus))/(2*epsilon)
 end;
-> If theta is initialised to zero (or any value which is the same for all elements of theta), thetas from each feature (x, e 1:n) feeding into activation units of hidden layer will take on teh same values following BackProp (gradient descent), and the activation units of the hidden layer will also take the same value!
+> If theta is initialised to zero (or any value which is the same for all elements of theta), thetas from each feature (x, e 1:n) feeding into activation units of hidden layer will take on the same values following BackProp (gradient descent), and the activation units of the hidden layer will also take the same value!
 * Thus, thetas are randomly initialised, eg:
 If the dimensions of Theta1 is 10x11, Theta2 is 10x11 and Theta3 is 1x11.
 Theta1 = rand(10,11) * (2 * INIT_EPSILON) - INIT_EPSILON;

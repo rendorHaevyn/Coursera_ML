@@ -1,0 +1,140 @@
+== Model features & implementation notes ==
+
+Feature scaling (range, high-low) & mean normalisation:
+> ie (xi- u) / s
+> assists with convergence speed
+> use with linear and logisitic regression
+
+Learning rate (alpha):
+> try a range of values, with 3 fold increase (10e-3,3*10e03,10e-1,3*10e-1,1,3)
+> begin with a low rate, then increase, plotting convergence
+> a higher alpha will increase convergence speed but might lead to parameter estimates bouncing out of the local minima
+> a lower alpha will train slowly
+
+Train-Cross Validation-Test Split & Function:
+> Generate model θ's (paramaters) on the Training set (60% of data), choose the model with the lowest cost function on the Cross Validation set (20%), then estimate generalisation of the model on the Test set (20%)
+
+Underfitting and Overfitting:
+> Underfitting is known as having bias - typically, Training error and Cross Validation errors are high
+> Overfitting is known as having variance - typically, Training error is low and Cross Validation error is high
+> If there are too many features and very few training examples then overfitting can be a problem 
+> We want models to "generalise" to new test data
+> For underfitting, we might want to:
+* increase the # of features
+* build more complex features (polynomial, etc)
+* decrease regularisation coefficient
+* Note: increasing m (training examples) typically will not help
+> For overfitting, we might want to:
+* decrease the # of features
+* consider more specific feature selection
+* increase regularisation coefficient
+* increase m (training examples)
+
+Regularisation rate (lambda):
+> upwardly adjusts the cost function for the θ parameters
+> can be used to correct underfitting and overfitting
+> a higher lambda increases the penalty on θ, and trends toward underfitting
+> a lower lambda decreases the penalty on θ, and trends toward overfitting
+> Note: we do not penalise the intercept term (bias node) - we only penalise the features
+> a range of lambda values can be iterated across models, and cost function outcomes can be plotted across these models for Cross Validation and Training sets to visualise underfitting or overfitting
+
+Learning Curve model diagnostics:
+> Plot cost function (error) by m (# of training examples used)
+
+Feature extension / addition:
+> extra features can be created through polynomial (cubic, quadratic, square) or other (tan, log, square root) transforms
+> such features can assist with models with high bias (underfit), and to fit non-linear boundaries
+
+Error Analysis in Model Build:
+> Start with a simple algorithm, implement it quickly, and validate it early on your cross validation data.
+> Plot learning curves to decide if more data, more features, or other approaches are likely to help.
+> Manually examine the errors on examples in the cross validation set and try to spot a trend where most of the errors were made.
+
+Skewed Classes (ie: rate events):
+> Have more examples in one class than another class
+> Use a confusion matrix to determine accuracy:
+* Precision: of predicted cases, what % were true-positive = True Positive / # Predicted Positive = True Positive / (True Positive + False Positive)
+* Recall: of actual cases, what % did we accurately predict = True Positive / # Actual Positive = True Positive / (True Positive + False Negative)
+
+F1 Score:
+> F1 Score = 2 * (P*R) / (P + R), where P = Precision & R = Recall
+> F1 Score element of {0...1}
+
+Large Data:
+> if using a large number of features, be sure to use a large number of training examples, so as to not overfit on the training set
+
+Which Model to Choose:
+> If n (features) is high and m (training examples is low), use logistic regression or SVM with a linear kernel; ie: n=10k, m=1k
+> If n is small and m is intermediate (ie: n=1k, m=10k), use SVM with Gaussian kernel
+> If n is small (~1k) and m is large (50k+), Gaussian kernels struggle with this, so 
+    * create additional features, and 
+    * use logistic regression or SVM without a kernel (ie: linear kernel)
+> A neural network will work well in all conditions, but might take longer to train
+
+
+
+
+== Linear regression ==
+
+Background:
+> models can produce predicted values << 0 and >> 1, even if training examples are such that y∈{0,1}
+> outliers can drastically change linear regression classification and thus significantly impair prediction accuracy
+> convex functions, which always have a global minima
+
+Normal Equation:
+The "normal equation" for linear regression solves for the global minima - feature scaling is not required
+> θ = pinv(X'.X).X'.Y
+
+Implementation Notes:
+> if n (# features) is large (ie: >=10,000), then use gradient descent
+> if n (# features) is small (ie: <=10,000), then use "normal equation"
+
+
+== Logistic regression ==
+
+Background:
+> classification is required when predicting a small number of discrete values
+> models can be set up to produce a classification hypothesis such that 0 <= hθ(x) <= 1
+> the decision boundary reflects the line dividing parameters in the feature space between the regions where the hypothesis predicts y = 1 from the region that predict where y = 0
+> good for discrete hypotheses (creating a definition boundary for straight lines and ellipses), but not for complex multi-feature non-linear problems
+
+Implementation Notes:
+> adjust the decision boundary to influence test sensitivity - increase to increase precision (True Positive / # Predicted Positive), at the expense of lower recall (True Positive / # Actual Positive)
+
+Multiclass Classification:
+> a single class (one of k classes) is separated out from the others and assigned a positive class (y=1), while everything else is bundled as a negative class (y=0)
+> we will end up with k logistic regression classifiers, predicting a single class relative to all others bundled
+> we run all k binary logistic regression classifiers, and pick the classifier that maximises hθ(x)
+
+
+== Neural Networks ==
+
+Background:
+> well suited to complex multi-feature non-linear problems
+> forward propagation trains the θ's (weights) across layers
+> backward propagation essentially functions as gradient descent, calculating the error term for the output layer, then iterating backwards through the hidden layers
+
+Implementation Notes:
+> If θ is initialised to zero (or any value which is the same for all elements of θ), θ's from each feature feeding into activation units of hidden layer will take on the same values following BackProp, and the activation units of the hidden layer will also take the same value!
+> Thus, input layer θ's are randomly initialised, including multiplication through a small value, epsilon (ie: Ɛ=1e-4)
+
+
+== Support Vector Machines ==
+
+Background:
+> the hypothesis, h(θ), outputs a scalar of 0 or 1
+> SVM has a built in buffer zone, acting as a "large margin" classifier, which means that the predicted line between classes has the largest margin between classes
+> convex functions, which always have a global minima
+
+Implementation Notes:
+> Kernels (such as similarity or Gaussian Kernel) can help define non-linear boundaries
+> Landmarks, based off values for x, can be used with a similar function to create model features (proximity of examples to proximity landmarks)
+> Coefficients for sigma (similarity function) and C (regularisation) can be tweaked to adjust model underfit or overfit
+> Different kernels can be chosen to change model fit, such as: * linear=straight line decision boundary, which might be used when # features is high and # training examples is low
+* Gaussian kernel / similarity function - NOTE: remember to perform feature scaling first!
+* Polynoial kernel: will need to tweak the constant term and polynomial term / exponent
+* Other kernels, such as string, chi-square, histogram intersection, etc
+
+
+
+
