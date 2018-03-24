@@ -1,4 +1,4 @@
-== Model features & implementation notes ==
+== Model features & general implementation notes ==
 
 Feature scaling (range, high-low) & mean normalisation:
 > ie (xi- u) / s
@@ -71,7 +71,44 @@ Which Model to Choose:
     * use logistic regression or SVM without a kernel (ie: linear kernel)
 > A neural network will work well in all conditions, but might take longer to train
 
+Anomaly Detection vs Supervised Learning:
+> Anomaly Detection when:
+* very few positive (anomalous) examples
+* lots of negative examples
+* many types of anomalies, which are rare, and very difficult to predict
+> Supervised Learning when:
+* large number of positive and negative examples
+* positive examples can be explained by the algorithm, and will predictable appear in future test sets
 
+Batch, Mini-Batch and Stochastic Gradient Descent:
+a) Batch gradient descent       - use m examples
+> "Batch gradient descent" is where the descent algorithm uses all of the training examples to calculate theta updates, and can be computationally expensive with large datasets
+b) Stochastic gradient descent  - use 1 examples
+> Stochastic GD only deals with the cost of one training example at a time.
+> Randomly shuffle the dataset, then parameters for each example
+> SGD doesnt descend exactly to the local minima, but will head down towards it then oscillate around the global minimum
+> Convergence can be checked by: 
+* during learning, compute cost J, then update θ
+* every 1,000 iterations, plot the cost J averaged over the last 1,000 examples processed
+* If there is a lot of noise in the plot, try increasing the # examples averaged over
+* If the curve is increasing, this suggests divergence, so perhaps use a smaller alpha (rate of descent reduction)
+* To enhance descent toward the global minima, for SGD we can slowly decrease alpha to assist with convergence of θ, and this should reduce the oscillation
+c) Mini batch gradient descent  - use b examples (where 1 < b <  m)
+> b is typically between {2,100}
+> Repeat similarly to SGD, except in batches of 'b' examples, up to m examples
+> Good vectorization implementation in MBGD can facilitate for speed greater than SGD
+
+Map-Reduce and Data Parallelism:
+> Split the training dataset into portions and get different machines to run the calculations across the cost function and gradient descent, then unite the results later on
+> Parallelise over machine cores, or across machines
+
+Ceiling Analysis:
+> When thinking about which part of the machine learning pipeline to invest the most time into, we can approach it in the following way with a method called "Ceiling Analysis":
+* Look at accuracy of entire system on test set
+* Look at change in accuracy when 100% accurate answers are provided to Text Detection
+* Look at change in accuracy when 100% accurate answers are provided to Character Segmentation
+* Look at change in accuracy when 100% accurate answers are provided to Character Recognition
+* This will help us narrow down to the value of adding more resources to particular areas of the pipeline
 
 
 == Linear regression ==
@@ -136,5 +173,65 @@ Implementation Notes:
 * Other kernels, such as string, chi-square, histogram intersection, etc
 
 
+== Clustering ==
+Background:
+> K-Means randomly initialises K clusters, serially averaging the closest (Euclidian vector) observations to generate a map of training examples to these clusters, with re-zoning of the cluster to example member averages
+
+Implementation Notes:
+> Minimise the cost function or Distortion of the K-Means, which is the norm of the difference between x(i) and uc(i)
+> Cluster centroids are randomly initialised; clusters which end up with zero observations can be removed or re-initialised
+> The cost function should always converge to a minimum, and never increase
+> In considering random initialisation:
+* there may be local optima
+* therefore, consider running K-Means for multiple iterations, then choosing clusters with the lowest cost distortion
+> In considering K number of clusters:
+* This is often manual - consider this application in the context of real-world application
+* The "elbow method" approach is to plot the Cost function J by # Clusters, and where the drop-off in J becomes low, chose that # Clusters
 
 
+== Dimensionality Reduction ==
+Background:
+> Principally reduces memory requirements for data storage, and assists learning algorithms in running more rapidly
+> PCA minimises the distance between both feature values and the line of fit, which is minimisation of the orthogonal distance 
+
+Implementation Notes:
+> Before PCA, undertake mean normalisation and feature scaling!
+> In reducing the feature dimensions from n to k, compute the "covariance matrix", Sigma matrix, and the eigenvectors or "Single Value Decomposition" of matrix Sigma
+> In choosing k components, ensure that a minimum of 99% of variance is retained in the projection (ie: reduce features n to the point where variance can still significantly explained by the model)
+> Create PCA mapping based on the training set only, then apply these same maps to the cross validation and test sets
+> Before performing PCA, build the model with all features, n - if it is slow / memory problems, the implement PCA and use z features (the compressed representation)
+> Note: do not use PCA to prevent overfitting - use regularisation instead.
+
+
+== Anomaly Detection ==
+Background:
+> Density estimation can be used to predict outliers
+> Consider building a multivariate Gaussian anomaly detection model, or if features are non-Gaussian, we can consider transforming them (log, log+constant, sqrt, **1/3...)
+
+Implementation Notes:
+> Train: Build model, p(x), with "good" targets only, as the training data (60% split)
+> Cross Validate: 20% of training set, using 50% of the "bad/anomalous" targets
+* Predict y=1 (anomaly) if p (x) < ε (epsilon)
+* Evaluate with true-+ve, false-+ve, true--ve, false--ve, Precision/Recall, F-score
+* Using prediction accuracy is not ideal with skewed data (ie: rare anomolies) as prediction of non-anomalous data will be regarded as having high accuracy
+> We can use the cross validation set to choose a value for epsilon, ε 
+> Test: 20% of training set, using 50% of the "bad/anomalous" targets
+
+
+== Supervised Learning - Image Object Detection ==
+Implementation Notes:
+> build training dataset with small positive images (y=1) and negative images (y=0, no pedestrians present)
+* scan a window (small size) in the top left
+* scan / slide the window / patch across the input image, moving by a given step size / stride across the image
+* increase the size of the window / patch, and slide / scan across the input image, with the potential to detect larger-size pedestrians
+> Artificial data synthesis for photo OCR can be undertaken by:
+* Taking characters from free font libraries and pasting them onto random backgrounds
+* Apply various operators, such as torsion, blurring, affine distortion, scaling, distortion
+* Take actual positive image, then use artificial distortions, such as warping and other transforming
+* With audio, we can add background sounds to increase the training dataset artificially
+* These distortions **should be representative of what we would observe in the test set!**
+> before creating new data, ensure that we are using a low bias classifier first, by plotting learning curves; if not, increase the number of features / hidden units until we do (have a low bias classifier), and then start adding in extra training examples
+> think about how much work it would take to get 10x's the amount of data?
+* consider artificial data synthesis (generate data from scratch, or using existing example and introduce distortions)
+* collect the data and label them myself (ie: # eggs in a photo)
+* crowd-source (ie: Amazon Mechanical Turk) - hire others to label the data for you, at low cost
